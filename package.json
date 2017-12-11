@@ -1,0 +1,42 @@
+{
+  "name": "@slatestudio/dyno-authentication",
+  "description": "Node authentication library",
+  "tags": [
+    "node",
+    "redis"
+  ],
+  "version": "0.0.1",
+  "author": "Alexander Kravets <alex@slatestudio.com>",
+  "contributors": [
+    {
+      "name": "Sergey Oprya",
+      "email": "sergey@slatestudio.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/slate-studio/dyno-authentication.git"
+  },
+  "bugs": {
+    "url": "http://github.com/slate-studio/dyno-authentication/issues"
+  },
+  "engines": [
+    "node >= 8.0"
+  ],
+  "main": "./index",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "crypto": "^1.0.1",
+    "redis": "^2.7.1"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "istanbul": "git+https://github.com/slate-studio/istanbul.git",
+    "mocha": "^4.0.0"
+  },
+  "license": "ISC",
+  "scripts": {
+    "mocha": "istanbul cover _mocha",
+    "test": "NODE_ENV=test npm run mocha"
+  }
+}
