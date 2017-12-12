@@ -68,16 +68,16 @@ class Authentication {
       .verify(this.publicKey, signature, 'base64')
   }
 
-  async verifyRedisSession() {
-    const session = await redis.getAsync(this.sessionRedisKey)
-    return (session !== null)
+  verifyRedisSession() {
+    return redis.getAsync(this.sessionRedisKey)
+      .then(session => session !== null)
   }
 
   verifyOperationId() {
     return (this.session.operationIds.indexOf(this.operationId) >= 0)
   }
 
-  async exec(callback) {
+  exec(callback) {
     let isAuthenticationTokenValid
 
     try {
@@ -93,15 +93,18 @@ class Authentication {
       return callback(new InvalidAuthenticationTokenError())
     }
 
-    if (!await this.verifyRedisSession()) {
-      return callback(new InvalidSessionError(this.sessionRedisKey))
-    }
-
     if (!this.verifyOperationId()) {
       return callback(new OperationAccessDeniedError(this.operationId))
     }
 
-    return callback()
+    return this.verifyRedisSession()
+      .then(result => {
+        if (result) {
+          return callback()
+        }
+
+        callback(new InvalidSessionError(this.sessionRedisKey))
+      })
   }
 }
 
