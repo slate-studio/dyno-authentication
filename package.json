@@ -25,6 +25,7 @@
   ],
   "main": "./index",
   "dependencies": {
+    "lodash": "^4.17.4",
     "bluebird": "^3.5.0",
     "crypto": "^1.0.1",
     "redis": "^2.7.1"

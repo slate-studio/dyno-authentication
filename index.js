@@ -1,5 +1,6 @@
 'use strict'
 
+const _      = require('lodash')
 const crypto = require('crypto')
 
 class BadAuthenticationTokenError extends Error {
@@ -45,7 +46,7 @@ class OperationAccessDeniedError extends Error {
 class Authentication {
   constructor(authenticationToken, req) {
     this.authenticationToken = authenticationToken
-    this.operationId         = req.swagger.operation.operationId
+    this.operationId         = _.get(req, 'swagger.operation.operationId')
     this.session             = req.requestNamespace.get('session')
     this.sessionId           = req.requestNamespace.get('sessionId')
     this.sessionRedisKey     = `Session_${this.sessionId}`
