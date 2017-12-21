@@ -47,7 +47,7 @@ class Authentication {
   constructor(authenticationToken, req) {
     this.authenticationToken = authenticationToken
     this.operationId         = _.get(req, 'swagger.operation.operationId')
-    this.originalOperationId = req.requestNamespace.get('originalOperationId')
+    this.sourceOperationId   = req.requestNamespace.get('sourceOperationId')
     this.session             = req.requestNamespace.get('session')
     this.sessionId           = req.requestNamespace.get('sessionId')
     this.sessionRedisKey     = `Session_${this.sessionId}`
@@ -75,15 +75,15 @@ class Authentication {
   }
 
   verifyOperationId() {
-    if (this.session.operationIds.indexOf(this.originalOperationId) === -1) {
+    if (!_.includes(this.session.operationIds, this.sourceOperationId)) {
       return false
     }
 
-    if (this.operationId != this.originalOperationId) {
+    if (this.operationId != this.sourceOperationId) {
       const dependencyOperationId = 
-        `${this.originalOperationId}.${this.operationId}`
+        `${this.sourceOperationId}.${this.operationId}`
 
-      if (this.session.dependencies.indexOf(dependencyOperationId) === -1) {
+      if (!_.includes(this.session.dependencies, dependencyOperationId)) {
         return false
       }
     }
