@@ -25,7 +25,7 @@ class InvalidAuthenticationTokenError extends Error {
 
 class InvalidSessionError extends Error {
   constructor(sessionRedisKey) {
-    super('Session expired or deleted', sessionRedisKey)
+    super(`Session expired or deleted: ${sessionRedisKey}`)
 
     this.name           = this.constructor.name
     this.httpStatusCode = 'Unauthorized'
@@ -35,7 +35,7 @@ class InvalidSessionError extends Error {
 
 class OperationAccessDeniedError extends Error {
   constructor(operationId) {
-    super('Access denied for', operationId)
+    super(`Access denied for: ${operationId}`)
 
     this.name           = this.constructor.name
     this.httpStatusCode = 'Forbidden'
@@ -98,7 +98,6 @@ class Authentication {
       isAuthenticationTokenValid = this.verifyAuthenticationToken()
 
     } catch (error) {
-      // log.debug('verifyAuthenticationToken error:', error)
       return callback(new BadAuthenticationTokenError())
 
     }
