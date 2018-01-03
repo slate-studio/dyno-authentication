@@ -35,7 +35,7 @@ class InvalidSessionError extends Error {
 
 class OperationAccessDeniedError extends Error {
   constructor(operationId) {
-    super(`Access denied for: ${operationId}`)
+    super(`Access denied for operation: ${operationId}`)
 
     this.name           = this.constructor.name
     this.httpStatusCode = 'Forbidden'
