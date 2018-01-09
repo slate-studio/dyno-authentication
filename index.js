@@ -25,7 +25,7 @@ class InvalidAuthenticationTokenError extends Error {
 
 class InvalidSessionError extends Error {
   constructor(sessionRedisKey) {
-    super('Session expired or deleted', sessionRedisKey)
+    super(`Session expired or deleted: ${sessionRedisKey}`)
 
     this.name           = this.constructor.name
     this.httpStatusCode = 'Unauthorized'
@@ -47,6 +47,7 @@ class Authentication {
   constructor(authenticationToken, req) {
     this.authenticationToken = authenticationToken
     this.operationId         = _.get(req, 'swagger.operation.operationId')
+    this.sourceOperationId   = req.requestNamespace.get('sourceOperationId')
     this.session             = req.requestNamespace.get('session')
     this.sessionId           = req.requestNamespace.get('sessionId')
     this.sessionRedisKey     = `Session_${this.sessionId}`
@@ -74,7 +75,20 @@ class Authentication {
   }
 
   verifyOperationId() {
-    return (this.session.operationIds.indexOf(this.operationId) >= 0)
+    if (!_.includes(this.session.operationIds, this.sourceOperationId)) {
+      return false
+    }
+
+    if (this.operationId != this.sourceOperationId) {
+      const dependencyOperationId = 
+        `${this.sourceOperationId}.${this.operationId}`
+
+      if (!_.includes(this.session.dependencies, dependencyOperationId)) {
+        return false
+      }
+    }
+
+    return true
   }
 
   async exec(callback) {
@@ -84,7 +98,6 @@ class Authentication {
       isAuthenticationTokenValid = this.verifyAuthenticationToken()
 
     } catch (error) {
-      // log.debug('verifyAuthenticationToken error:', error)
       return callback(new BadAuthenticationTokenError())
 
     }
