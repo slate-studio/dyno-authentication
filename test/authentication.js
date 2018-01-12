@@ -1,7 +1,7 @@
 'use strict'
 
 const crypto         = require('crypto')
-const Authentication = require('../index')
+const Authentication = require('../lib').Authentication
 
 const idnId      = '1'
 const facilityId = '1'
@@ -56,21 +56,22 @@ const buildAuthenticationToken = ({ idnId, facilityId, session }) => {
   return new Buffer(objectWithSignatureJson).toString('base64')
 }
 
-const buildSession = (sessionId, operationIds) => {
+const buildSession = (sessionId, operationIds, dependencies) => {
   return {
     integerId: parseInt(sessionId),
     userId:    '1',
     roleId:    '1',
     operationIds,
+    dependencies,
     createdAt: new Date()
   }
 }
 
-const buildRequest = (sessionId, session, operationId) => {
+const buildRequest = (sessionId, session, operationId, sourceOperationId) => {
   // const requestNamespace = new RequestNamespace({ sessionId, session })
   const requestNamespace = {
     get: key => {
-      const namespace = { sessionId, session }
+      const namespace = { sessionId, session, sourceOperationId }
       return namespace[key] || null
     }
   }
@@ -93,13 +94,33 @@ describe('Authentication:', () => {
 
   it('should return true if authorized', done => {
     const sessionId = '100'
-    const session   = buildSession(sessionId, [ 'testOperation' ])
+    const session   = buildSession(sessionId, [ 3056 ], [])
 
     const authenticationToken = buildAuthenticationToken({
       idnId, facilityId, session
     })
 
-    const req = buildRequest(sessionId, session, 'testOperation')
+    const req = buildRequest(sessionId, session, 'a1', 'a1')
+
+    addSessionToRedis(sessionId, session)
+      .then(() => {
+        const authentication = new Authentication(authenticationToken, req)
+        authentication.exec(error => {
+          expect(error).to.equal(undefined)
+          done()
+        })
+      })
+  })
+
+  it('should return true if authorized (with dependencies)', done => {
+    const sessionId = '100'
+    const session   = buildSession(sessionId, [ 3056 ], { '3087': '0' })
+
+    const authenticationToken = buildAuthenticationToken({
+      idnId, facilityId, session
+    })
+
+    const req = buildRequest(sessionId, session, 'b1', 'a1')
 
     addSessionToRedis(sessionId, session)
       .then(() => {
@@ -113,13 +134,13 @@ describe('Authentication:', () => {
 
   it('should return OperationAccessDeniedError', done => {
     const sessionId = '100'
-    const session   = buildSession(sessionId, [ 'wrongOperation' ])
+    const session   = buildSession(sessionId, [ 3057 ], [])
 
     const authenticationToken = buildAuthenticationToken({
       idnId, facilityId, session
     })
 
-    const req = buildRequest(sessionId, session, 'testOperation')
+    const req = buildRequest(sessionId, session, 'a1', 'a1')
 
     addSessionToRedis(sessionId, session)
       .then(() => {
@@ -133,13 +154,13 @@ describe('Authentication:', () => {
 
   it('should return InvalidAuthenticationTokenError', done => {
     const sessionId = '1000'
-    const session   = buildSession(sessionId, [ 'testOperation' ])
+    const session   = buildSession(sessionId, [ 3056 ], [])
 
     const signature           = 'wrong_signature'
     const json                = JSON.stringify({ signature })
     const authenticationToken = new Buffer(json).toString('base64')
 
-    const req = buildRequest(sessionId, session, 'testOperation')
+    const req = buildRequest(sessionId, session, 'a1', 'a1')
 
     const authentication = new Authentication(authenticationToken, req)
     authentication.exec(error => {
@@ -151,10 +172,10 @@ describe('Authentication:', () => {
 
   it('should return BadAuthenticationTokenError', done => {
     const sessionId           = '1000'
-    const session             = buildSession(sessionId, [ 'testOperation' ])
+    const session             = buildSession(sessionId, [ 3056 ], [])
     const authenticationToken = 'SOME_RANDOM_VALUE'
 
-    const req = buildRequest(sessionId, session, 'testOperation')
+    const req = buildRequest(sessionId, session, 'a1', 'a1')
 
     const authentication = new Authentication(authenticationToken, req)
     authentication.exec(error => {
@@ -165,19 +186,39 @@ describe('Authentication:', () => {
 
   it('should return InvalidSessionError', done => {
     const sessionId = '1000'
-    const session   = buildSession(sessionId, [ 'testOperation' ])
+    const session   = buildSession(sessionId, [ 3056 ], [])
 
     const authenticationToken = buildAuthenticationToken({
       idnId, facilityId, session
     })
 
-    const req = buildRequest(sessionId, session, 'testOperation')
+    const req = buildRequest(sessionId, session, 'a1', 'a1')
 
     const authentication = new Authentication(authenticationToken, req)
     authentication.exec(error => {
       expect(error.name).to.equal('InvalidSessionError')
       done()
     })
+  })
+
+  it('should return OperationAccessDeniedError', done => {
+    const sessionId = '100'
+    const session   = buildSession(sessionId, [ 3056 ], [])
+
+    const authenticationToken = buildAuthenticationToken({
+      idnId, facilityId, session
+    })
+
+    const req = buildRequest(sessionId, session, 'a2', 'a1')
+
+    addSessionToRedis(sessionId, session)
+      .then(() => {
+        const authentication = new Authentication(authenticationToken, req)
+        authentication.exec(error => {
+          expect(error.name).to.equal('OperationAccessDeniedError')
+          done()
+        })
+      })
   })
 
 })
