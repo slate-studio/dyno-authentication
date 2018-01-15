@@ -15,4 +15,5 @@ before(go => {
   })
 })
 
-require('./authentication')
+// require('./authentication')
+require('./operations')
