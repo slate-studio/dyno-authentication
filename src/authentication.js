@@ -20,15 +20,12 @@ class Authentication {
     }
 
     try {
+      this.token = this.token.replace('Bearer ', '')
       this.jwt = new JWT(this.token)
 
     } catch (error) {
       return this._onError(new errors.BadAuthenticationTokenError(error))
 
-    }
-
-    if (!this.jwt.isValid) {
-      return this._onError(new errors.InvalidAuthenticationTokenError())
     }
   }
 
