@@ -3,12 +3,15 @@
 const crypto = require('crypto')
 
 class JWT {
-  constructor(token) {
+  constructor(token, publicKey) {
     const [ headerBase64, payloadBase64, signature, publicKeyCompact ] = token.split('.')
 
-    const verify    = crypto.createVerify('RSA-SHA256')
-    const message   = `${headerBase64}.${payloadBase64}`
-    const publicKey = JWT.publicKeyRestore(publicKeyCompact)
+    const verify  = crypto.createVerify('RSA-SHA256')
+    const message = `${headerBase64}.${payloadBase64}`
+
+    if (!publicKey) {
+      publicKey = JWT.publicKeyRestore(publicKeyCompact)
+    }
 
     const isValid = verify.update(message).verify(publicKey, signature, 'base64')
 
