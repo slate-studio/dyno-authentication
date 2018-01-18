@@ -12,7 +12,7 @@ class NoAuthenticationTokenError extends Error {
 
 class BadAuthenticationTokenError extends Error {
   constructor(error) {
-    super('Bad authentication token value.')
+    super(`Authentication token error: ${error}`)
 
     this.name           = this.constructor.name
     this.httpStatusCode = 'Bad Request'
