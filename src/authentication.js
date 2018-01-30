@@ -16,7 +16,7 @@ class Authentication {
 
   _verifyToken() {
     if (!this.token) {
-      return this._onError(new errors.NoAuthenticationTokenError())
+      throw new errors.NoAuthenticationTokenError()
     }
 
     try {
@@ -24,7 +24,7 @@ class Authentication {
       this.jwt = new JWT(this.token)
 
     } catch (error) {
-      return this._onError(new errors.BadAuthenticationTokenError(error))
+      throw new errors.BadAuthenticationTokenError(error)
 
     }
   }
@@ -34,13 +34,7 @@ class Authentication {
     const operationId       = this.req.swagger.operation.operationId
     const sourceOperationId = this.namespace.get('sourceOperationId')
 
-    try {
-      Operations.verify(ops, sourceOperationId, operationId)
-
-    } catch (error) {
-      return this._onError(error)
-
-    }
+    Operations.verify(ops, sourceOperationId, operationId)
 
     // const operationIds = this.namespace.get('operationIds')
     // const dependencies = this.namespace.get('dependencies')
@@ -62,21 +56,18 @@ class Authentication {
     return null
   }
 
-  _onError(error) {
-    this.isSuccess = false
-    return this.callback(error)
-  }
-
   exec(callback) {
-    this.callback = callback
+    try {
+      this._verifyToken()
+      this._verifyOperationId()
+      this._verifySession()
 
-    this._verifyToken()
-    this._verifyOperationId()
-    this._verifySession()
+    } catch(error) {
+      return callback(error)
 
-    if (this.isSuccess) {
-      return this.callback()
     }
+
+    return callback()
   }
 }
 
