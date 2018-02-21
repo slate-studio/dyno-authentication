@@ -5,8 +5,8 @@ class NoAuthenticationTokenError extends Error {
     super('No authentication token provided')
 
     this.name           = this.constructor.name
-    this.httpStatusCode = 'Bad Request'
-    this.statusCode     = 400
+    this.httpStatusCode = 'Unauthorized'
+    this.statusCode     = 401
   }
 }
 
@@ -15,21 +15,11 @@ class BadAuthenticationTokenError extends Error {
     super(`Authentication token error: ${error}`)
 
     this.name           = this.constructor.name
-    this.httpStatusCode = 'Bad Request'
-    this.statusCode     = 400
+    this.httpStatusCode = 'Unauthorized'
+    this.statusCode     = 401
     this.error          = error
   }
 }
-
-// class InvalidAuthenticationTokenError extends Error {
-//   constructor() {
-//     super('Invalid authorization token signature')
-
-//     this.name           = this.constructor.name
-//     this.httpStatusCode = 'Unauthorized'
-//     this.statusCode     = 401
-//   }
-// }
 
 class OperationAccessDeniedError extends Error {
   constructor(operationId) {
@@ -55,7 +45,6 @@ class OperationHashCollisionError extends Error {
 module.exports = {
   NoAuthenticationTokenError,
   BadAuthenticationTokenError,
-  // InvalidAuthenticationTokenError,
   OperationAccessDeniedError,
   OperationHashCollisionError
 }

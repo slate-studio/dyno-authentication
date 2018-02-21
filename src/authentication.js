@@ -1,27 +1,45 @@
 'use strict'
 
-const errors     = require('./errors')
-const JWT        = require('./jwt')
+const errors = require('./errors')
+const KMS    = require('./kms')
+const JWT    = require('jsonwebtoken');
 const Operations = require('./operations')
 
 class Authentication {
   constructor(token, req) {
-    this.token     = token
-    this.namespace = req.requestNamespace
-    this.jwt       = null
-    this.callback  = null
-    this.isSuccess = true
-    this.req       = req
-  }
+    this.token = token
+    this.req   = req
+    this.jwt   = null
 
-  _verifyToken() {
+    this.publicKey         = req.app.get('publicKey')
+    this.encryptionContext = req.app.get('encryptionContext')
+
     if (!this.token) {
       throw new errors.NoAuthenticationTokenError()
     }
 
+    this.token = this.token.replace('Bearer ', '')
+    this.type  = 'JWT'
+
+    if (this.token.split('.').length < 3) {
+      this.type = 'KMS'
+    }
+  }
+
+  async verifyToken() {
     try {
-      this.token = this.token.replace('Bearer ', '')
-      this.jwt = new JWT(this.token)
+      if (this.type == 'KMS') {
+        this.req.authenticationTokenPayload =
+          await KMS.verify(this.token, this.encryptionContext)
+
+        this.req.authenticationTokenPayload.userId    = 'system'
+        this.req.authenticationTokenPayload.sessionId = 'kms'
+
+      } else {
+        this.req.authenticationTokenPayload =
+          JWT.verify(this.token, this.publicKey)
+
+      }
 
     } catch (error) {
       throw new errors.BadAuthenticationTokenError(error)
@@ -29,10 +47,14 @@ class Authentication {
     }
   }
 
-  _verifyOperationId() {
-    const { ops }           = this.jwt.header
+  async verifyOperationId() {
+    return
+
+    // TODO: Change it to role based, pull roles specs from redis.
+    const { roleIds } = this.req.authenticationTokenPayload
+
     const operationId       = this.req.swagger.operation.operationId
-    const sourceOperationId = this.namespace.get('sourceOperationId')
+    const sourceOperationId = this.req.requestNamespace.get('sourceOperationId')
 
     Operations.verify(ops, sourceOperationId, operationId)
 
@@ -52,22 +74,8 @@ class Authentication {
     // }
   }
 
-  _verifySession() {
+  async verifySession() {
     return null
-  }
-
-  exec(callback) {
-    try {
-      this._verifyToken()
-      this._verifyOperationId()
-      this._verifySession()
-
-    } catch(error) {
-      return callback(error)
-
-    }
-
-    return callback()
   }
 }
 

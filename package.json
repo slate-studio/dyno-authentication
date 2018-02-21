@@ -1,6 +1,6 @@
 {
   "name": "@slatestudio/dyno-authentication",
-  "description": "Node authentication library",
+  "description": "Dyno authentication library",
   "tags": [
     "node",
     "redis"
@@ -25,10 +25,9 @@
   ],
   "main": "./index",
   "dependencies": {
-    "lodash": "^4.17.4",
-    "bluebird": "^3.5.0",
-    "crypto": "^1.0.1",
-    "redis": "^2.7.1"
+    "aws-sdk": "^2.199.0",
+    "jsonwebtoken": "^8.1.1",
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
     "chai": "^4.1.2",
