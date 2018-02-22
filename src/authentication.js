@@ -2,7 +2,7 @@
 
 const errors = require('./errors')
 const KMS    = require('./kms')
-const JWT    = require('jsonwebtoken');
+const JWT    = require('jsonwebtoken')
 const Operations = require('./operations')
 
 class Authentication {
