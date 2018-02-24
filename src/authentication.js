@@ -30,7 +30,7 @@ class Authentication {
     try {
       if (this.type == 'KMS') {
         this.req.authenticationTokenPayload =
-          await KMS.verify(this.token, this.encryptionContext)
+          await KMS.decrypt(this.token, this.encryptionContext)
 
         this.req.authenticationTokenPayload.userId    = 'system'
         this.req.authenticationTokenPayload.sessionId = 'kms'

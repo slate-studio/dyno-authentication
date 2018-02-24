@@ -4,7 +4,7 @@ const _   = require('lodash')
 const aws = require('aws-sdk')
 
 class KMS {
-  static async sign(payload, EncryptionContext, KeyId) {
+  static async encrypt(payload, EncryptionContext, KeyId) {
     const payloadJson = JSON.stringify(payload)
     const Plaintext   = new Buffer(payloadJson).toString('base64')
 
@@ -13,7 +13,7 @@ class KMS {
       const contextJson = JSON.stringify(EncryptionContext)
       const Context     = new Buffer(contextJson).toString('base64')
 
-      return `${Plaintext}.${Context}`
+      return encodeURIComponent(`${Plaintext}.${Context}`)
 
     } else {
       const kms   = new aws.KMS()
@@ -22,11 +22,11 @@ class KMS {
     }
   }
 
-  static async verify(CiphertextBlob, EncryptionContext) {
+  static async decrypt(CiphertextBlob, EncryptionContext) {
     let Plaintext, Context
 
     if (CiphertextBlob.split('.').length == 2) {
-      [ Plaintext, Context ] = CiphertextBlob.split('.')
+      [ Plaintext, Context ] = decodeURIComponent(CiphertextBlob).split('.')
 
       const contextJson = new Buffer(Context, 'base64').toString()
       const contextDecoded = JSON.parse(contextJson)
