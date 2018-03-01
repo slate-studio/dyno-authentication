@@ -1,5 +1,6 @@
 'use strict'
 
-const lib = require('./lib')
-
-module.exports = lib
+module.exports = {
+  authenticationToken: require('./src/authenticationToken'),
+  facilityScope:       require('./src/facilityScope')
+}
