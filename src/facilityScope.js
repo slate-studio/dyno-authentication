@@ -5,9 +5,9 @@ const qs = require('querystring')
 
 module.exports = async (req, spec, scope, callback) => {
   try {
-    scope = qs.parse(scope, ';', ':')
+    const scopeObject = qs.parse(scope, ';', ':')
 
-    const { idnId, facilityId } = scope
+    const { idnId, facilityId } = scopeObject
     const { facilities } = req.authenticationTokenPayload
     const integerId = Number(facilityId)
     const facility  = _.find(facilities, { idnId, integerId })
