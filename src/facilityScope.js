@@ -10,9 +10,9 @@ module.exports = async (req, spec, scope, callback) => {
     const { idnId, facilityId } = scopeObject
     const { facilities } = req.authenticationTokenPayload
     const integerId = Number(facilityId)
-    const facility  = _.find(facilities, { idnId, integerId })
+    req.facility    = _.find(facilities, { idnId, integerId })
 
-    if (!facility) {
+    if (!req.facility) {
       throw Error('Bad facility scope')
     }
 
