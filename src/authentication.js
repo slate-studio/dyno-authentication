@@ -1,9 +1,10 @@
 'use strict'
 
-const errors = require('./errors')
-const KMS    = require('./kms')
-const JWT    = require('jsonwebtoken')
+const config     = require('config')
+const JWT        = require('jsonwebtoken')
 const Operations = require('./operations')
+const errors     = require('./errors')
+const KMS        = require('./kms')
 
 class Authentication {
   constructor(token, req) {
@@ -11,8 +12,8 @@ class Authentication {
     this.req   = req
     this.jwt   = null
 
-    this.publicKey         = req.app.get('publicKey')
-    this.encryptionContext = req.app.get('encryptionContext')
+    this.publicKey         = config.service.publicKey
+    this.encryptionContext = config.service.encryptionContext
 
     if (!this.token) {
       throw new errors.NoAuthenticationTokenError()
@@ -48,6 +49,7 @@ class Authentication {
   }
 
   async verifyOperationId() {
+    // TODO: Allow only kms role for KMS type.
     return
 
     // TODO: Change it to role based, pull roles specs from redis.
