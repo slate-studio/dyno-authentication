@@ -7,10 +7,11 @@ module.exports = async (req, spec, token, callback) => {
     const authentication = new Authentication(token, req)
 
     await authentication.verifyToken()
-    await authentication.verifyOperationId()
     await authentication.verifySession()
+    await authentication.verifyPermissions()
 
   } catch(error) {
+    log.debug(error)
     return callback(error)
 
   }

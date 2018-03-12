@@ -1,10 +1,10 @@
 'use strict'
 
-const config     = require('config')
-const JWT        = require('jsonwebtoken')
-const Operations = require('./operations')
-const errors     = require('./errors')
-const KMS        = require('./kms')
+const JWT    = require('jsonwebtoken')
+const KMS    = require('./kms')
+const config = require('@slatestudio/dyno/lib/config')
+const errors = require('./errors')
+const verifyPermissions = require('./verifyPermissions')
 
 class Authentication {
   constructor(token, req) {
@@ -33,8 +33,9 @@ class Authentication {
         this.req.authenticationTokenPayload =
           await KMS.decrypt(this.token, this.encryptionContext)
 
-        this.req.authenticationTokenPayload.userId    = 'system'
-        this.req.authenticationTokenPayload.sessionId = 'kms'
+        this.req.authenticationTokenPayload.userId    = 'kms'
+        this.req.authenticationTokenPayload.roleIds   = [ 'kms' ]
+        this.req.authenticationTokenPayload.sessionId = 'system'
 
       } else {
         this.req.authenticationTokenPayload =
@@ -48,36 +49,13 @@ class Authentication {
     }
   }
 
-  async verifyOperationId() {
-    // TODO: Allow only kms role for KMS type.
-    return
-
-    // TODO: Change it to role based, pull roles specs from redis.
-    const { roleIds } = this.req.authenticationTokenPayload
-
-    const operationId       = this.req.swagger.operation.operationId
-    const sourceOperationId = this.req.requestNamespace.get('sourceOperationId')
-
-    Operations.verify(ops, sourceOperationId, operationId)
-
-    // const operationIds = this.namespace.get('operationIds')
-    // const dependencies = this.namespace.get('dependencies')
-
-    // if (operationIds.indexOf(sourceOperationId) > -1) {
-    //   return this._onError(new errors.OperationAccessDeniedError(operationId))
-    // }
-
-    // if (operationId != sourceOperationId) {
-    //   const dependency = `${sourceOperationId}.${operationId}`
-
-    //   if (dependencies.indexOf(dependency) > -1) {
-    //     return this._onError(new errors.OperationAccessDeniedError(dependency))
-    //   }
-    // }
-  }
-
   async verifySession() {
     return null
+  }
+
+  async verifyPermissions() {
+    const { roleIds } = this.req.authenticationTokenPayload
+    await verifyPermissions(this.req, roleIds)
   }
 }
 
