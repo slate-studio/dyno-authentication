@@ -21,7 +21,7 @@ module.exports = async (req, spec, scope, callback) => {
     req.permissions   = _.find(permissions, { facilityId })
     const { roleIds } = req.permissions
 
-    verifyPermissions(req, roleIds)
+    await verifyPermissions(req, roleIds)
 
     req.requestNamespace.set('idnId', idnId)
     req.requestNamespace.set('facilityId', facilityId)

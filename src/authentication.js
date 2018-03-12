@@ -55,7 +55,10 @@ class Authentication {
 
   async verifyPermissions() {
     const { roleIds } = this.req.authenticationTokenPayload
-    await verifyPermissions(this.req, roleIds)
+
+    if (roleIds) {
+      await verifyPermissions(this.req, roleIds)
+    }
   }
 }
 
