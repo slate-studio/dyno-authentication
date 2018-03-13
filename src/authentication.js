@@ -44,6 +44,7 @@ class Authentication {
       }
 
     } catch (error) {
+      log.debug(error)
       throw new errors.BadAuthenticationTokenError(error)
 
     }
