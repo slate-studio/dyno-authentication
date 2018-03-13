@@ -28,6 +28,7 @@ module.exports = async (req, spec, scope, callback) => {
     req.requestNamespace.set('facilityScope', scope)
 
   } catch (error) {
+    log.debug(error)
     return callback(error)
 
   }
