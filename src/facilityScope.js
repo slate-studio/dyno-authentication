@@ -1,6 +1,5 @@
 'use strict'
 
-const _  = require('lodash')
 const qs = require('querystring')
 const verifyPermissions = require('./verifyPermissions')
 
@@ -12,13 +11,13 @@ module.exports = async (req, spec, scope, callback) => {
     const { facilities, permissions } = req.authenticationTokenPayload
 
     const integerId = Number(facilityId)
-    req.facility    = _.find(facilities, { idnId, integerId })
+    req.facility    = facilities.find(f => f.integerId === integerId)
 
     if (!req.facility) {
       throw Error('Bad facility scope')
     }
 
-    req.permissions   = _.find(permissions, { facilityId })
+    req.permissions   = permissions.find(p => p.facilityId === facilityId)
     const { roleIds } = req.permissions
 
     await verifyPermissions(req, roleIds)
