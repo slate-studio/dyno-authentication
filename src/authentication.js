@@ -12,7 +12,7 @@ class Authentication {
     this.req   = req
     this.jwt   = null
 
-    this.publicKey         = config.service.publicKey
+    this.publicKey         = config.secrets.publicKey
     this.encryptionContext = config.service.encryptionContext
 
     if (!this.token) {
