@@ -33,6 +33,8 @@ class Authentication {
         this.req.authenticationTokenPayload =
           await KMS.decrypt(this.token, this.encryptionContext)
 
+        this.req.authenticationTokenPayload.roleIds = [ 'kms' ]
+
       } else {
         this.req.authenticationTokenPayload =
           JWT.verify(this.token, this.publicKey)
