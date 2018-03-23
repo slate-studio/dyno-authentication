@@ -23,8 +23,9 @@ module.exports = async (req, spec, scope, callback) => {
 
     req.requestNamespace.set('idnId', idnId)
     req.requestNamespace.set('facilityId', facilityId)
-    req.requestNamespace.set('facilityScope', scope)
     req.requestNamespace.set('facility', req.facility)
+    req.requestNamespace.set('facilityScope', scope)
+    req.requestNamespace.set('collectionNamePostfix', req.facility.collectionNamePostfix)
     req.requestNamespace.set('permissions', req.permissions)
 
   } catch (error) {
