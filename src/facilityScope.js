@@ -12,10 +12,10 @@ module.exports = async (req, spec, scope, callback) => {
 
     const integerId = Number(facilityId)
     if (isNaN(integerId)) {
-      req.facility = facilities.find(f => f._integerId === integerId)
+      req.facility = facilities.find(f => f.id === facilityId)
 
     } else {
-      req.facility = facilities.find(f => f.id === facilityId)
+      req.facility = facilities.find(f => f._integerId === integerId)
 
     }
 
