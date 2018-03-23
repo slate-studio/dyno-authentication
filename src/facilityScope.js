@@ -11,7 +11,13 @@ module.exports = async (req, spec, scope, callback) => {
     const { facilities, permissions } = req.authenticationTokenPayload
 
     const integerId = Number(facilityId)
-    req.facility    = facilities.find(f => f.integerId === integerId)
+    if (isNaN(integerId)) {
+      req.facility = facilities.find(f => f._integerId === integerId)
+
+    } else {
+      req.facility = facilities.find(f => f.id === facilityId)
+
+    }
 
     if (!req.facility) {
       throw Error('Bad facility scope')
