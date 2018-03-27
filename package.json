@@ -30,7 +30,7 @@
     "js-yaml": "^3.11.0",
     "jsonwebtoken": "^8.1.1",
     "lodash": "^4.17.4",
-    "@slatestudio/dyno": "git+https://github.com/slate-studio/dyno.git"
+    "@slatestudio/dyno": "^0.19.5"
   },
   "devDependencies": {
     "chai": "^4.1.2",
