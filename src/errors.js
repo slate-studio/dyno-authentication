@@ -21,6 +21,16 @@ class BadAuthenticationTokenError extends Error {
   }
 }
 
+class InvalidSessionError extends Error {
+  constructor() {
+    super('Invalid session')
+
+    this.name           = this.constructor.name
+    this.httpStatusCode = 'Unauthorized'
+    this.statusCode     = 401
+  }
+}
+
 class OperationAccessDeniedError extends Error {
   constructor(operationId) {
     super(`Operation access denied for: ${operationId}`)
@@ -33,6 +43,7 @@ class OperationAccessDeniedError extends Error {
 
 module.exports = {
   NoAuthenticationTokenError,
+  InvalidSessionError,
   BadAuthenticationTokenError,
   OperationAccessDeniedError
 }

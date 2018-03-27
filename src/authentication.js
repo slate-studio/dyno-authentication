@@ -49,7 +49,12 @@ class Authentication {
   }
 
   async verifySession() {
-    return null
+    const { sessionId } = this.req.authenticationTokenPayload
+    const isUsed = await redis.getAsync(`blacklist_sessionId_${sessionId}`)
+
+    if (isUsed) {
+      throw new errors.InvalidSessionError()
+    }
   }
 
   async verifyPermissions() {
