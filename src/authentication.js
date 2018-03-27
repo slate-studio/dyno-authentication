@@ -55,6 +55,8 @@ class Authentication {
       throw new errors.BadAuthenticationTokenError(error)
 
     }
+
+    log.debug({ authenticationTokenPayload: this.req.authenticationTokenPayload })
   }
 
   async verifySession() {
