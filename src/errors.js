@@ -21,6 +21,16 @@ class BadAuthenticationTokenError extends Error {
   }
 }
 
+class ExpiredAuthenticationTokenError extends Error {
+  constructor() {
+    super('Authentication token is expired')
+
+    this.name           = this.constructor.name
+    this.httpStatusCode = 'Unauthorized'
+    this.statusCode     = 401
+  }
+}
+
 class InvalidSessionError extends Error {
   constructor() {
     super('Invalid session')
@@ -42,6 +52,7 @@ class OperationAccessDeniedError extends Error {
 }
 
 module.exports = {
+  ExpiredAuthenticationTokenError,
   NoAuthenticationTokenError,
   InvalidSessionError,
   BadAuthenticationTokenError,

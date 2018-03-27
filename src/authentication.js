@@ -6,6 +6,9 @@ const config = require('@slatestudio/dyno/lib/config')
 const errors = require('./errors')
 const verifyPermissions = require('./verifyPermissions')
 
+const KMS_USER_ID = 'kms'
+const KMS_ROLE_ID = 'kms'
+
 class Authentication {
   constructor(token, req) {
     this.token = token
@@ -33,14 +36,20 @@ class Authentication {
         this.req.authenticationTokenPayload =
           await KMS.decrypt(this.token, this.encryptionContext)
 
-        this.req.authenticationTokenPayload.roleIds = [ 'kms' ]
+        const { expiresAt } = this.req.authenticationTokenPayload
+        const now = new Date()
+
+        if (expiresAt < now) {
+          throw new ExpiredAuthenticationTokenError()
+        }
+
+        this.req.authenticationTokenPayload.roleIds = [ KMS_ROLE_ID ]
 
       } else {
         this.req.authenticationTokenPayload =
           JWT.verify(this.token, this.publicKey)
 
       }
-
     } catch (error) {
       log.debug(error)
       throw new errors.BadAuthenticationTokenError(error)
@@ -49,8 +58,18 @@ class Authentication {
   }
 
   async verifySession() {
-    const { sessionId } = this.req.authenticationTokenPayload
-    const isUsed = await redis.getAsync(`blacklist_sessionId_${sessionId}`)
+    const { sessionId, userId } = this.req.authenticationTokenPayload
+
+    let isUsed
+
+    if (userId == KMS_USER_ID) {
+      isUsed = await redis.getAsync(`blacklist_sessionId_kms_${sessionId}`)
+      await redis.setAsync(`blacklist_sessionId_${sessionId}`, true)
+
+    } else {
+      isUsed = await redis.getAsync(`blacklist_sessionId_${sessionId}`)
+
+    }
 
     if (isUsed) {
       throw new errors.InvalidSessionError()
