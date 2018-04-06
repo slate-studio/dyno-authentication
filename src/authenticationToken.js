@@ -22,7 +22,6 @@ module.exports = async(req, spec, token, callback) => {
 
     }
 
-    log.debug(error)
     return callback(error)
 
   }
