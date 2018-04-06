@@ -1,8 +1,9 @@
 'use strict'
 
 const Authentication = require('./authentication')
+const RequestError   = require('@slatestudio/dyno/lib/requestError')
 
-module.exports = async (req, spec, token, callback) => {
+module.exports = async(req, spec, token, callback) => {
   try {
     const authentication = new Authentication(token, req)
 
@@ -10,7 +11,17 @@ module.exports = async (req, spec, token, callback) => {
     await authentication.verifySession()
     await authentication.verifyPermissions()
 
-  } catch(error) {
+  } catch (originalError) {
+    let error
+
+    if (error.httpStatusCode) {
+      error = originalError
+
+    } else {
+      error = new RequestError('Bad authentication token', 'Unauthorized', originalError)
+
+    }
+
     log.debug(error)
     return callback(error)
 

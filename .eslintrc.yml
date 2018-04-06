@@ -8,11 +8,9 @@ env:
   mocha: true
 
 globals:
-  Promise: true
   log: true
-  Model: true
-  Listener: true
-  Message: true
+  Promise: true
+  redis: true
 
 rules:
   comma-style: error

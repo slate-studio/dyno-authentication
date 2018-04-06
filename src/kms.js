@@ -9,7 +9,8 @@ class KMS {
     const Plaintext   = new Buffer(payloadJson).toString('base64')
 
     if (_.isEmpty(KeyId)) {
-      log.warn(`No KeyId found in config, payload is not encrypted`)
+      log.warn('No KeyId found in config, payload is not encrypted')
+
       const contextJson = JSON.stringify(EncryptionContext)
       const Context     = new Buffer(contextJson).toString('base64')
 
@@ -37,7 +38,7 @@ class KMS {
 
     } else {
       const kms = new aws.KMS()
-      let { Plaintext } = await kms.decrypt({ CiphertextBlob, EncryptionContext })
+      Plaintext = await kms.decrypt({ CiphertextBlob, EncryptionContext }).Plaintext
 
     }
 

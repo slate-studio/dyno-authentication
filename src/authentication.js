@@ -3,7 +3,7 @@
 const JWT    = require('jsonwebtoken')
 const KMS    = require('./kms')
 const config = require('@slatestudio/dyno/lib/config')
-const errors = require('./errors')
+const RequestError      = require('@slatestudio/dyno/lib/requestError')
 const verifyPermissions = require('./verifyPermissions')
 
 const KMS_USER_ID = 'kms'
@@ -19,7 +19,7 @@ class Authentication {
     this.encryptionContext = config.service.encryptionContext
 
     if (!this.token) {
-      throw new errors.NoAuthenticationTokenError()
+      throw new RequestError('No authentication token provided', 'Unauthorized')
     }
 
     this.token = this.token.replace('Bearer ', '')
@@ -31,28 +31,25 @@ class Authentication {
   }
 
   async verifyToken() {
-    try {
-      if (this.type == 'KMS') {
-        this.req.authenticationTokenPayload =
-          await KMS.decrypt(this.token, this.encryptionContext)
+    if (this.type == 'KMS') {
+      this.req.authenticationTokenPayload =
+        await KMS.decrypt(this.token, this.encryptionContext)
 
-        const { expiresAt } = this.req.authenticationTokenPayload
-        const now = new Date()
+      const { expiresAt } = this.req.authenticationTokenPayload
+      const now = new Date()
 
-        if (expiresAt < now) {
-          throw new ExpiredAuthenticationTokenError()
-        }
+      if (expiresAt < now) {
+        const expiredError = new RequestError('Authentication token has expired', 'Unauthorized')
+        expiredError.code  = 'ExpiredAuthenticationTokenError'
 
-        this.req.authenticationTokenPayload.roleIds = [ KMS_ROLE_ID ]
-
-      } else {
-        this.req.authenticationTokenPayload =
-          JWT.verify(this.token, this.publicKey)
-
+        throw expiredError
       }
-    } catch (error) {
-      log.debug(error)
-      throw new errors.BadAuthenticationTokenError(error)
+
+      this.req.authenticationTokenPayload.roleIds = [ KMS_ROLE_ID ]
+
+    } else {
+      this.req.authenticationTokenPayload =
+        JWT.verify(this.token, this.publicKey)
 
     }
 
@@ -74,7 +71,7 @@ class Authentication {
     }
 
     if (isUsed) {
-      throw new errors.InvalidSessionError()
+      throw new RequestError('Session has been blacklisted', 'Unauthorized')
     }
   }
 

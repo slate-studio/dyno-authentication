@@ -1,9 +1,9 @@
 'use strict'
 
-const errors = require('./errors')
 const config = require('@slatestudio/dyno/lib/config')
+const RequestError = require('@slatestudio/dyno/lib/requestError')
 
-module.exports = async (req, roleIds) => {
+module.exports = async(req, roleIds) => {
   const { permissions }   = config
   const operationId       = req.swagger.operation.operationId
   const sourceOperationId = req.requestNamespace.get('sourceOperationId')
@@ -17,14 +17,14 @@ module.exports = async (req, roleIds) => {
   }
 
   if (operationIds.indexOf(sourceOperationId) < 0) {
-    throw new errors.OperationAccessDeniedError(operationId)
+    throw new RequestError(`No permissions to execute requested operation: ${sourceOperationId}`, 'Forbidden')
   }
 
   if (operationId != sourceOperationId) {
     const dependency = `${sourceOperationId}.${operationId}`
 
     if (dependencies.indexOf(dependency) < 0) {
-      throw new errors.OperationAccessDeniedError(dependency)
+      throw new RequestError(`No permissions to execute operations dependency: ${dependency}`, 'Forbidden')
     }
   }
 }
