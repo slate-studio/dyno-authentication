@@ -40,7 +40,7 @@ class Authentication {
 
       if (expiresAt < now) {
         const expiredError = new RequestError('Authentication token has expired', 'Unauthorized')
-        expiredError.code  = 'ExpiredAuthenticationTokenError'
+        expiredError.name  = 'ExpiredAuthenticationTokenError'
 
         throw expiredError
       }
@@ -48,8 +48,19 @@ class Authentication {
       this.req.authenticationTokenPayload.roleIds = [ KMS_ROLE_ID ]
 
     } else {
-      this.req.authenticationTokenPayload =
-        JWT.verify(this.token, this.publicKey)
+      try {
+        this.req.authenticationTokenPayload =
+          JWT.verify(this.token, this.publicKey)
+
+      } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+          const expiredError = new RequestError('Authentication token has expired', 'Unauthorized')
+          expiredError.name  = 'ExpiredAuthenticationTokenError'
+          throw expiredError
+        }
+
+        throw error
+      }
 
     }
 

@@ -14,7 +14,7 @@ module.exports = async(req, spec, token, callback) => {
   } catch (originalError) {
     let error
 
-    if (error.httpStatusCode) {
+    if (originalError.httpStatusCode) {
       error = originalError
 
     } else {
