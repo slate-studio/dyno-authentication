@@ -9,7 +9,7 @@ class KMS {
     const Plaintext   = new Buffer(payloadJson).toString('base64')
 
     if (_.isEmpty(KeyId)) {
-      log.warn('No KeyId found in config, payload is not encrypted')
+      log.warn('[kms] KeyId is empty, payload is not encrypted:', payload)
 
       const contextJson = JSON.stringify(EncryptionContext)
       const Context     = new Buffer(contextJson).toString('base64')

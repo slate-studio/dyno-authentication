@@ -64,7 +64,8 @@ class Authentication {
 
     }
 
-    log.debug({ authenticationTokenPayload: this.req.authenticationTokenPayload })
+    log.debug({ authenticationTokenPayload: this.req.authenticationTokenPayload },
+      'Authentication token is valid')
   }
 
   async verifySession() {
