@@ -69,7 +69,8 @@ class Authentication {
   }
 
   async verifySession() {
-    const { sessionId, userId } = this.req.authenticationTokenPayload
+    let { sessionId, userId, accountUserId } = this.req.authenticationTokenPayload
+    userId = userId || accountUserId
 
     let isUsed
 

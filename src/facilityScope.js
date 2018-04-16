@@ -42,7 +42,7 @@ module.exports = async(req, spec, scope, callback) => {
     return callback(error)
   }
 
-  const { roleIds } = req.permissions
+  const { userId, roleIds } = req.permissions
 
   try {
     await verifyPermissions(req, roleIds)
@@ -58,6 +58,8 @@ module.exports = async(req, spec, scope, callback) => {
   req.requestNamespace.set('facilityScope', scope)
   req.requestNamespace.set('permissions', req.permissions)
   req.requestNamespace.set('collectionNamePostfix', req.facility.collectionNamePostfix)
+
+  req.authenticationTokenPayload.userId = userId
 
   return callback()
 }
